@@ -907,8 +907,8 @@ nvinfer1::ILayer * layer_conv(std::vector<nvinfer1::Weights> &trtWeights_,
 	int size = n_filters_ * chw[0] * n_kernel_size_ * n_kernel_size_;
 	nvinfer1::Weights convWt{ nvinfer1::DataType::kFLOAT, nullptr, size };
 	float *conv_wts = new float[size];
-	assert(size == (vec_wts.size()));
 	std::vector<float> &vec_wts = map_wts_[s_layer_name_ + ".weight"];
+    assert(size == (vec_wts.size()));
 	for (int i = 0; i < size; ++i)
 	{
 		conv_wts[i] = vec_wts[i];

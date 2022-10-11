@@ -41,6 +41,7 @@ Yolo::Yolo( const NetworkInfo& networkInfo, const InferParams& inferParams) :
 {
 	// m_ClassNames = loadListFromTextFile(m_LabelsFilePath);
 
+
 	m_configBlocks = parseConfigFile(m_ConfigFilePath);
 	if (m_NetworkType == "yolov5")
 		parse_cfg_blocks_v5(m_configBlocks);
@@ -127,7 +128,7 @@ std::vector<int> split_layer_index(const std::string &s_,const std::string &deli
 
 void Yolo::createYOLOEngine(const nvinfer1::DataType dataType, Int8EntropyCalibrator* calibrator)
 {
-	if (fileExists(m_EnginePath))return;
+	if (fileExists(m_EnginePath)) return;
 	std::vector<float> weights = loadWeights(m_WtsFilePath, m_NetworkType);
     std::vector<nvinfer1::Weights> trtWeights;
     int weightPtr = 0;
@@ -951,6 +952,11 @@ void Yolo::load_weights_v5(const std::string s_weights_path_,
 void Yolo::doInference(const unsigned char* input, const uint32_t batchSize)
 {
 	//Timer timer;
+    if (batchSize != m_BatchSize)
+    {
+        std::cout << "Batch size mismatch! Expected " << m_BatchSize << " but got " << batchSize << std::endl;
+        assert(0);
+    }
     assert(batchSize <= m_BatchSize && "Image batch size exceeds TRT engines batch size");
     NV_CUDA_CHECK(cudaMemcpyAsync(m_DeviceBuffers.at(m_InputBindingIndex), input,
                                   batchSize * m_InputSize * sizeof(float), cudaMemcpyHostToDevice,
@@ -1112,12 +1118,14 @@ void Yolo::parseConfigBlocks()
 			outputTensor.gridSize = (m_InputH / 32) * pow(2, _n_yolo_ind);
 			outputTensor.grid_h = (m_InputH / 32) * pow(2, _n_yolo_ind);
 			outputTensor.grid_w = (m_InputW / 32) * pow(2, _n_yolo_ind);
-			if (m_NetworkType == "yolov4")//pan
+
+            if (m_NetworkType == "yolov4") //pan
 			{
 				outputTensor.gridSize = (m_InputH / 32) * pow(2, 2-_n_yolo_ind);
 				outputTensor.grid_h = (m_InputH / 32) * pow(2, 2-_n_yolo_ind);
 				outputTensor.grid_w = (m_InputW / 32) * pow(2, 2-_n_yolo_ind);
 			}
+
 			outputTensor.stride = m_InputH / outputTensor.gridSize;
 			outputTensor.stride_h = m_InputH / outputTensor.grid_h;
 			outputTensor.stride_w = m_InputW / outputTensor.grid_w;

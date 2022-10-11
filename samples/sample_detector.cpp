@@ -4,6 +4,7 @@
 #include <memory>
 #include <thread>
 
+using namespace yolo_tensorrt;
 
 int main()
 {
@@ -14,14 +15,6 @@ int main()
 	config_v3.calibration_image_list_file_txt = "../configs/calibration_images.txt";
 	config_v3.inference_precison =FP32;
 	config_v3.detect_thresh = 0.5;
-
-	Config config_v3_tiny;
-	config_v3_tiny.net_type = YOLOV3_TINY;
-	config_v3_tiny.detect_thresh = 0.7;
-	config_v3_tiny.file_model_cfg = "../configs/yolov3-tiny.cfg";
-	config_v3_tiny.file_model_weights = "../configs/yolov3-tiny.weights";
-	config_v3_tiny.calibration_image_list_file_txt = "../configs/calibration_images.txt";
-	config_v3_tiny.inference_precison = FP32;
 
 	Config config_v4;
 	config_v4.net_type = YOLOV4;
