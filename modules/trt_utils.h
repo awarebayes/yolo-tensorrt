@@ -131,7 +131,7 @@ public:
 //};
 
 // Common helper functions
-void blobFromDsImages(const std::vector<DsImage>& inputImages, cv::Mat& blob, const int& inputH, const int& inputW);
+void blobFromDsImages(std::vector<DsImage>& inputImages, unsigned char *blob, const int& inputH, const int& inputW);
 std::string trim(std::string s);
 std::string triml(std::string s, const char* t);
 std::string trimr(std::string s, const char* t);

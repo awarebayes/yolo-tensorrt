@@ -58,7 +58,7 @@ private:
     std::vector<std::string> m_ImageList;
     std::vector<char> m_CalibrationCache;
 
-    cv::Mat m_blob;
+    unsigned char *m_blob;
 };
 
 #endif

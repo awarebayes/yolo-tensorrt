@@ -51,6 +51,8 @@ Int8EntropyCalibrator::Int8EntropyCalibrator(const uint32_t& batchSize, const st
 		std::random_device rng;
 		std::mt19937 urng(rng());
 
+        m_blob = new unsigned char[m_InputCount * sizeof(float)];
+
 		m_ImageList = loadImageList(calibImages, calibImagesPath);
 		m_ImageList.resize(static_cast<int>(m_ImageList.size() / m_BatchSize) * m_BatchSize);
 		std::shuffle(m_ImageList.begin(), m_ImageList.end(), urng);
@@ -59,7 +61,10 @@ Int8EntropyCalibrator::Int8EntropyCalibrator(const uint32_t& batchSize, const st
     NV_CUDA_CHECK(cudaMalloc(&m_DeviceInput, m_InputCount * sizeof(float)));
 }
 
-Int8EntropyCalibrator::~Int8EntropyCalibrator() { NV_CUDA_CHECK(cudaFree(m_DeviceInput)); }
+Int8EntropyCalibrator::~Int8EntropyCalibrator() {
+    NV_CUDA_CHECK(cudaFree(m_DeviceInput));
+    delete[] m_blob;
+}
 
 bool Int8EntropyCalibrator::getBatch(void* bindings[], const char* names[], int /*nbBindings*/) noexcept
 {
@@ -73,9 +78,10 @@ bool Int8EntropyCalibrator::getBatch(void* bindings[], const char* names[], int 
     }
     m_ImageIndex += m_BatchSize;
 
+    assert(false && "Not implemented! you need to rewrite this to enable function below");
     blobFromDsImages(dsImages, m_blob, m_InputH, m_InputW);
 
-    NV_CUDA_CHECK(cudaMemcpy(m_DeviceInput, m_blob.ptr<float>(0), m_InputCount * sizeof(float),
+    NV_CUDA_CHECK(cudaMemcpy(m_DeviceInput, m_blob, m_InputCount * sizeof(float),
                              cudaMemcpyHostToDevice));
     assert(!strcmp(names[0], m_InputBlobName.c_str()));
     bindings[0] = m_DeviceInput;

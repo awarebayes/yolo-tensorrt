@@ -37,7 +37,7 @@ public:
     DsImage(const cv::Mat& mat_image_, const std::string &s_net_type_, const int& inputH, const int& inputW);
     int getImageHeight() const { return m_Height; }
     int getImageWidth() const { return m_Width; }
-    const cv::Mat& getLetterBoxedImage() const { return m_LetterboxImage; }
+    cv::Mat& getLetterBoxedImage() { return m_LetterboxImage; }
     cv::Mat getOriginalImage() const { return m_OrigImage; }
     std::string getImageName() const { return m_ImageName; }
     void addBBox(BBoxInfo box, const std::string& labelName);
