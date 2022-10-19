@@ -959,7 +959,7 @@ void Yolo::doInference(const unsigned char* input, const uint32_t batchSize)
     }
     assert(batchSize <= m_BatchSize && "Image batch size exceeds TRT engines batch size");
     NV_CUDA_CHECK(cudaMemcpyAsync(m_DeviceBuffers.at(m_InputBindingIndex), input,
-                                  batchSize * m_InputSize * sizeof(float), cudaMemcpyHostToDevice,
+                                  batchSize * m_InputSize * sizeof(float), cudaMemcpyDeviceToDevice,
                                   m_CudaStream));
 	
     m_Context->enqueue(batchSize, m_DeviceBuffers.data(), m_CudaStream, nullptr);
