@@ -6,6 +6,8 @@
 - Cuda image processing
 - Get uploaded image (cuda::GpuFrame) for later usage with reid/poses/etc
 
+# Original reaadme:
+
 ![GitHub stars](https://img.shields.io/github/stars/enazoe/yolo-tensorrt) ![GitHub forks](https://img.shields.io/github/forks/enazoe/yolo-tensorrt)  ![GitHub watchers](https://img.shields.io/github/watchers/enazoe/yolo-tensorrt)  [![Gitter](https://badges.gitter.im/yolo-tensorrt/community.svg)](https://gitter.im/yolo-tensorrt/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 __news:__ 2021.06.04:yolov5-v5.0 support
