@@ -75,11 +75,6 @@ public:
     int getImageWidth() const { return m_Width; }
     cv::Mat& getLetterBoxedImage() { return m_LetterboxImage; }
     cv::Mat getOriginalImage() const { return m_OrigImage; }
-    std::string getImageName() const { return m_ImageName; }
-    void addBBox(BBoxInfo box, const std::string& labelName);
-    void showImage() const;
-    void saveImageJPEG(const std::string& dirPath) const;
-    std::string exportJson() const;
     void letterbox(const int& inputH, const int& inputW);
 
 private:
