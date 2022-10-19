@@ -73,7 +73,7 @@ public:
     CudaPipeline(const std::string &s_net_type, const int& inputH_, const int& inputW_) : s_net_type_(s_net_type), inputH(inputH_), inputW(inputW_) {};
     int getImageHeight() const { return m_Height; }
     int getImageWidth() const { return m_Width; }
-    cv::Mat& getLetterBoxedImage() { return m_LetterboxImage; }
+    cv::Mat& getLetterBoxedImage() { return m_Float; }
     cv::Mat getOriginalImage() const { return m_OrigImage; }
     void preprocess(const cv::Mat &image);
     void await() {};
