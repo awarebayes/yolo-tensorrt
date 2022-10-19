@@ -225,7 +225,7 @@ std::string DsImage::exportJson() const
     return json.str();
 }
 
-CudaPipeline::CudaPipeline(const cv::Mat& mat_image_, const std::string &s_net_type_, const int& inputH, const int& inputW)
+void CudaPipeline::preprocess(const cv::Mat& mat_image_)
 {
 	m_OrigImage = mat_image_;
 	m_Height = m_OrigImage.rows;
@@ -273,62 +273,6 @@ CudaPipeline::CudaPipeline(const cv::Mat& mat_image_, const std::string &s_net_t
 		cv::resize(m_OrigImage, m_LetterboxImage, cv::Size(inputW, inputH), 0, 0, cv::INTER_CUBIC);
 		// converting to RGB
 		//cv::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB);
-	}
-}
-
-CudaPipeline::CudaPipeline(const std::string& path, const std::string &s_net_type_, const int& inputH, const int& inputW)
-{
-    m_ImageName = fs::path(path).stem().string();
-	m_OrigImage = cv::imread(path, cv::IMREAD_UNCHANGED);
-	m_Height = m_OrigImage.rows;
-	m_Width = m_OrigImage.cols;
-	if (!m_OrigImage.data || m_OrigImage.cols <= 0 || m_OrigImage.rows <= 0)
-	{
-		std::cout << "Unable to open image : " << path << std::endl;
-		assert(0);
-	}
-
-	if (m_OrigImage.channels() != 3)
-	{
-		std::cout << "Non RGB images are not supported : " << path << std::endl;
-		assert(0);
-	}
-
-	if ("yolov5" == s_net_type_)
-	{
-		// resize the DsImage with scale
-		float dim = std::max(m_Height, m_Width);
-		int resizeH = ((m_Height / dim) * inputH);
-		int resizeW = ((m_Width / dim) * inputW);
-		m_ScalingFactor = static_cast<float>(resizeH) / static_cast<float>(m_Height);
-		float	m_ScalingFactorw = static_cast<float>(resizeW) / static_cast<float>(m_Width);
-
-		// Additional checks for images with non even dims
-		if ((inputW - resizeW) % 2) resizeW--;
-		if ((inputH - resizeH) % 2) resizeH--;
-		assert((inputW - resizeW) % 2 == 0);
-		assert((inputH - resizeH) % 2 == 0);
-
-		m_XOffset = (inputW - resizeW) / 2;
-		m_YOffset = (inputH - resizeH) / 2;
-
-		assert(2 * m_XOffset + resizeW == inputW);
-		assert(2 * m_YOffset + resizeH == inputH);
-
-		// resizing
-		cv::resize(m_OrigImage, m_LetterboxImage, cv::Size(resizeW, resizeH), 0, 0, cv::INTER_CUBIC);
-		// letterboxing
-		cv::copyMakeBorder(m_LetterboxImage, m_LetterboxImage, m_YOffset, m_YOffset, m_XOffset,
-			m_XOffset, cv::BORDER_CONSTANT, cv::Scalar(128, 128, 128));
-		//	cv::imwrite("letter.jpg", m_LetterboxImage);
-		// converting to RGB
-	//	cv::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB);
-	}
-	else
-	{
-		cv::resize(m_OrigImage, m_LetterboxImage, cv::Size(inputW, inputH), 0, 0, cv::INTER_CUBIC);
-		// converting to RGB
-	//	cv::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB);
 	}
 }
 

@@ -69,13 +69,15 @@ class CudaPipeline
 {
 public:
     CudaPipeline() = default;
-    CudaPipeline(const std::string& path, const std::string &s_net_type_, const int& inputH, const int& inputW);
-    CudaPipeline(const cv::Mat& mat_image_, const std::string &s_net_type_, const int& inputH, const int& inputW);
+    // CudaPipeline(const std::string& path, const std::string &s_net_type_, const int& inputH, const int& inputW);
+    CudaPipeline(const std::string &s_net_type, const int& inputH_, const int& inputW_) : s_net_type_(s_net_type), inputH(inputH_), inputW(inputW_) {};
     int getImageHeight() const { return m_Height; }
     int getImageWidth() const { return m_Width; }
     cv::Mat& getLetterBoxedImage() { return m_LetterboxImage; }
     cv::Mat getOriginalImage() const { return m_OrigImage; }
     void letterbox(const int& inputH, const int& inputW);
+    void preprocess(const cv::Mat &image);
+    void await() {};
 
 private:
     int m_Height = 0;
@@ -87,6 +89,9 @@ private:
     cv::RNG m_RNG { cv::RNG(unsigned(std::time(0))) };
     std::string m_ImageName;
     std::vector<BBoxInfo> m_Bboxes;
+    std::string s_net_type_;
+    const int inputH;
+    const int inputW;
 
     // unaltered original Image
     cv::Mat m_OrigImage;

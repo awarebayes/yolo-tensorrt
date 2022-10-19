@@ -35,19 +35,25 @@ namespace yolo_tensorrt {
             this->parse_config();
 
             this->build_net();
+
+            for (int i = 0; i < _config.batch_size; i++)
+            {
+                vec_ds_images.emplace_back(_vec_net_type[_config.net_type], _p_net->getInputH(), _p_net->getInputW());
+            }
         }
 
         void detect(const std::vector<cv::Mat> &vec_image,
                     std::vector<BatchResult> &vec_batch_result)
         {
-            std::vector<CudaPipeline> vec_ds_images;
             vec_batch_result.clear();
             if (vec_batch_result.capacity() < vec_image.size())
                 vec_batch_result.reserve(vec_image.size());
-            for (const auto &img: vec_image)
-            {
-                vec_ds_images.emplace_back(img, _vec_net_type[_config.net_type], _p_net->getInputH(), _p_net->getInputW());
-            }
+
+            for (int i = 0; i < vec_image.size(); i++)
+                vec_ds_images[i].preprocess(vec_image[i]);
+            for (int i = 0; i < vec_image.size(); i++)
+                vec_ds_images[i].await();
+
             blobFromDsImages(vec_ds_images, _p_net->getInputBuffer(), _p_net->getInputH(), _p_net->getInputW());
             _p_net->doInference(static_cast<uint32_t>(vec_ds_images.size()));
             for (size_t i = 0; i < vec_ds_images.size(); ++i)
@@ -136,6 +142,7 @@ namespace yolo_tensorrt {
         std::vector<std::string> _vec_precision{"kINT8", "kHALF", "kFLOAT"};
         std::unique_ptr<Yolo> _p_net = nullptr;
         Timer _m_timer;
+        std::vector<CudaPipeline> vec_ds_images;
     };
 }
 
