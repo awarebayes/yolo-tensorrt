@@ -47,6 +47,7 @@ SOFTWARE.
 #include "plugin_factory.h"
 //#include "logging.h"
 class DsImage;
+class CudaPipeline;
 struct BBox
 {
     float x1 = 0;
@@ -132,6 +133,7 @@ public:
 
 // Common helper functions
 void blobFromDsImages(std::vector<DsImage>& inputImages, unsigned char *blob, const int& inputH, const int& inputW);
+void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *blob, const int& inputH, const int& inputW);
 std::string trim(std::string s);
 std::string triml(std::string s, const char* t);
 std::string trimr(std::string s, const char* t);

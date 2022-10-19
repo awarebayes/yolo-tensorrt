@@ -42,7 +42,7 @@ namespace yolo_tensorrt {
         void detect(const std::vector<cv::Mat> &vec_image,
                     std::vector<BatchResult> &vec_batch_result)
         {
-            std::vector<DsImage> vec_ds_images;
+            std::vector<CudaPipeline> vec_ds_images;
             vec_batch_result.clear();
             if (vec_batch_result.capacity() < vec_image.size())
                 vec_batch_result.reserve(vec_image.size());

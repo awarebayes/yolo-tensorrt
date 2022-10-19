@@ -80,6 +80,44 @@ void blobFromDsImages(std::vector<DsImage>& inputImages, unsigned char *blob, co
     }
 }
 
+void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *blob, const int& inputH, const int& inputW)
+{
+    cv::Size size(inputW, inputH);
+    constexpr bool swapRB = true;
+    constexpr int ddepth = CV_32F;
+    constexpr int nch = 3;
+    size_t nimages = inputImages.size();
+
+    std::vector<cv::Mat *> matrices;
+    std::vector<cv::Mat> matrices_float;
+    for (auto &image : inputImages) {
+        matrices.push_back(&image.getLetterBoxedImage());
+        matrices_float.push_back(cv::Mat());
+    }
+
+    for (size_t i = 0; i < nimages; i++) {
+        cv::cvtColor(*matrices[i], *matrices[i], cv::COLOR_BGR2RGB);
+        matrices[i]->convertTo(matrices_float[i], CV_32FC3, 1.0);
+    }
+
+    int image_size = nch * inputH * inputW;
+
+    int n_channels = nch;
+
+    cv::Size m_input_size = cv::Size(inputW, inputH);
+
+    for (int im = 0; im < nimages; im++)
+    {
+        std::vector<cv::Mat> m_chw;
+        float *m_gpu_input = (float *)blob + im * image_size;
+        for (int ch = 0; ch < n_channels; ch++) {
+            float *dest = m_gpu_input + ch * inputH * inputW;
+            m_chw.emplace_back(cv::Mat(m_input_size, CV_32FC1, dest));
+        }
+        cv::split(matrices_float[im], m_chw);
+    }
+}
+
 static void leftTrim(std::string& s)
 {
     s.erase(s.begin(), find_if(s.begin(), s.end(), [](int ch) { return !isspace(ch); }));
