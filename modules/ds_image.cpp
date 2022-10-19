@@ -264,17 +264,13 @@ void CudaPipeline::preprocess(const cv::Mat& mat_image_)
 		// letterboxing
 		cv::copyMakeBorder(m_LetterboxImage, m_LetterboxImage, m_YOffset, m_YOffset, m_XOffset,
 			m_XOffset, cv::BORDER_CONSTANT, cv::Scalar(128, 128, 128));
-		//	cv::imwrite("letter.jpg", m_LetterboxImage);
-		// converting to RGB
-		cv::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB);
-        m_LetterboxImage.convertTo(m_Float, CV_32FC3, 1.0);
 	}
 	else
 	{
 		cv::resize(m_OrigImage, m_LetterboxImage, cv::Size(inputW, inputH), 0, 0, cv::INTER_CUBIC);
-		// converting to RGB
-		cv::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB);
-        m_LetterboxImage.convertTo(m_Float, CV_32FC3, 1.0);
 	}
+    cv::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB);
+    m_LetterboxImage.convertTo(m_Float, CV_32FC3, 1.0);
+    m_GpuMat.upload(m_Float);
 }
 

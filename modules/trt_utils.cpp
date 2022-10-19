@@ -92,13 +92,10 @@ void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *gpu
     constexpr int nch = 3;
     size_t nimages = inputImages.size();
 
-    std::vector<cv::cuda::GpuMat> matrices_float_gpu;
-    for (auto &image : inputImages) {
-        matrices_float_gpu.push_back(cv::cuda::GpuMat());
-    }
+    std::vector<cv::cuda::GpuMat*> matrices_float_gpu;
 
     for (size_t i = 0; i < nimages; i++) {
-        matrices_float_gpu[i].upload(inputImages[i].getLetterBoxedImage());
+        matrices_float_gpu.push_back(&inputImages[i].getResult());
     }
 
     int image_size = nch * inputH * inputW;
@@ -115,7 +112,7 @@ void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *gpu
             float *dest = m_gpu_input + ch * inputH * inputW;
             m_chw.emplace_back(cv::cuda::GpuMat(m_input_size, CV_32FC1, dest));
         }
-        cv::cuda::split(matrices_float_gpu[im], m_chw);
+        cv::cuda::split(*matrices_float_gpu[im], m_chw);
     }
 }
 
