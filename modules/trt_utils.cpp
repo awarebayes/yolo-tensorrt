@@ -36,6 +36,10 @@ namespace fs = std::experimental::filesystem;
 
 #include <fstream>
 #include <iomanip>
+#include <opencv2/cudaarithm.hpp>
+#include <opencv2/cudaimgproc.hpp>
+#include <opencv2/cudawarping.hpp>
+
 using namespace nvinfer1;
 REGISTER_TENSORRT_PLUGIN(MishPluginCreator);
 REGISTER_TENSORRT_PLUGIN(ChunkPluginCreator);
@@ -80,7 +84,7 @@ void blobFromDsImages(std::vector<DsImage>& inputImages, unsigned char *blob, co
     }
 }
 
-void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *blob, const int& inputH, const int& inputW)
+void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *gpu_blob, const int& inputH, const int& inputW)
 {
     cv::Size size(inputW, inputH);
     constexpr bool swapRB = true;
@@ -90,14 +94,17 @@ void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *blo
 
     std::vector<cv::Mat *> matrices;
     std::vector<cv::Mat> matrices_float;
+    std::vector<cv::cuda::GpuMat> matrices_float_gpu;
     for (auto &image : inputImages) {
         matrices.push_back(&image.getLetterBoxedImage());
         matrices_float.push_back(cv::Mat());
+        matrices_float_gpu.push_back(cv::cuda::GpuMat());
     }
 
     for (size_t i = 0; i < nimages; i++) {
         cv::cvtColor(*matrices[i], *matrices[i], cv::COLOR_BGR2RGB);
         matrices[i]->convertTo(matrices_float[i], CV_32FC3, 1.0);
+        matrices_float_gpu[i].upload(matrices_float[i]);
     }
 
     int image_size = nch * inputH * inputW;
@@ -108,13 +115,13 @@ void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *blo
 
     for (int im = 0; im < nimages; im++)
     {
-        std::vector<cv::Mat> m_chw;
-        float *m_gpu_input = (float *)blob + im * image_size;
+        std::vector<cv::cuda::GpuMat> m_chw;
+        float *m_gpu_input = (float *)gpu_blob + im * image_size;
         for (int ch = 0; ch < n_channels; ch++) {
             float *dest = m_gpu_input + ch * inputH * inputW;
-            m_chw.emplace_back(cv::Mat(m_input_size, CV_32FC1, dest));
+            m_chw.emplace_back(cv::cuda::GpuMat(m_input_size, CV_32FC1, dest));
         }
-        cv::split(matrices_float[im], m_chw);
+        cv::cuda::split(matrices_float_gpu[im], m_chw);
     }
 }
 

@@ -51,8 +51,8 @@ namespace yolo_tensorrt {
             {
                 vec_ds_images.emplace_back(img, _vec_net_type[_config.net_type], _p_net->getInputH(), _p_net->getInputW());
             }
-            blobFromDsImages(vec_ds_images, m_cpu_blob, _p_net->getInputH(), _p_net->getInputW());
-            cudaMemcpy(m_blob, m_cpu_blob, _p_net->getInputH() * _p_net->getInputW() * 3 * _config.batch_size * sizeof(float), cudaMemcpyHostToDevice);
+            blobFromDsImages(vec_ds_images, m_blob, _p_net->getInputH(), _p_net->getInputW());
+            // cudaMemcpy(m_blob, m_cpu_blob, _p_net->getInputH() * _p_net->getInputW() * 3 * _config.batch_size * sizeof(float), cudaMemcpyHostToDevice);
             _p_net->doInference(m_blob, static_cast<uint32_t>(vec_ds_images.size()));
             for (size_t i = 0; i < vec_ds_images.size(); ++i)
             {
