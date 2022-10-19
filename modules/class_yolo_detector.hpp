@@ -42,7 +42,7 @@ namespace yolo_tensorrt {
             }
         }
 
-        void detect(const std::vector<cv::Mat> &vec_image,
+        void detect(const std::vector<const cv::cuda::HostMem*> &vec_image,
                     std::vector<BatchResult> &vec_batch_result)
         {
             vec_batch_result.clear();
@@ -50,10 +50,9 @@ namespace yolo_tensorrt {
                 vec_batch_result.reserve(vec_image.size());
 
             for (int i = 0; i < vec_image.size(); i++)
-                vec_ds_images[i].preprocess(vec_image[i]);
+                vec_ds_images[i].preprocess(*vec_image[i]);
             for (int i = 0; i < vec_image.size(); i++)
                 vec_ds_images[i].await();
-
             blobFromDsImages(vec_ds_images, _p_net->getInputBuffer(), _p_net->getInputH(), _p_net->getInputW());
             _p_net->doInference(static_cast<uint32_t>(vec_ds_images.size()));
             for (size_t i = 0; i < vec_ds_images.size(); ++i)

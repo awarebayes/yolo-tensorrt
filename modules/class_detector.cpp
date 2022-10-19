@@ -30,7 +30,7 @@ namespace yolo_tensorrt {
         _impl->_detector.init(config);
     }
 
-    void Detector::detect(const std::vector<cv::Mat> &mat_image, std::vector<BatchResult> &vec_batch_result)
+    void Detector::detect(const std::vector<const cv::cuda::HostMem*> &mat_image, std::vector<BatchResult> &vec_batch_result)
     {
         _impl->_detector.detect(mat_image, vec_batch_result);
     }

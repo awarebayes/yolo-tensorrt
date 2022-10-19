@@ -32,6 +32,10 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
+#include <opencv2/cudawarping.hpp>
+#include <opencv2/cudaimgproc.hpp>
+#include <opencv2/cudaarithm.hpp>
+
 DsImage::DsImage(const cv::Mat& mat_image_, const std::string &s_net_type_, const int& inputH, const int& inputW)
 {
 	m_OrigImage = mat_image_;
@@ -225,9 +229,19 @@ std::string DsImage::exportJson() const
     return json.str();
 }
 
-void CudaPipeline::preprocess(const cv::Mat& mat_image_)
+void CudaPipeline::preprocess(const cv::Mat &image)
 {
-	m_OrigImage = mat_image_;
+    std::cout << "Warning: use the HostMem method!" << std::endl;
+    std::cout << "Warning: I will create host mem for you for now, do not use in prod!" << std::endl;
+    auto hostmem = cv::cuda::HostMem();
+    hostmem.create(image.size(), CV_8UC3);
+    image.copyTo(hostmem);
+    preprocess(hostmem);
+}
+
+void CudaPipeline::preprocess(const cv::cuda::HostMem& mat_image_)
+{
+    m_OrigImage.upload(mat_image_, m_Stream);
 	m_Height = m_OrigImage.rows;
 	m_Width = m_OrigImage.cols;
 	if (!m_OrigImage.data || m_OrigImage.cols <= 0 || m_OrigImage.rows <= 0)
@@ -260,17 +274,16 @@ void CudaPipeline::preprocess(const cv::Mat& mat_image_)
 		assert(2 * m_YOffset + resizeH == inputH);
 
 		// resizing
-		cv::resize(m_OrigImage, m_LetterboxImage, cv::Size(resizeW, resizeH), 0, 0, cv::INTER_CUBIC);
+		cv::cuda::resize(m_OrigImage, m_LetterboxImage, cv::Size(resizeW, resizeH), 0, 0, cv::INTER_CUBIC, m_Stream);
 		// letterboxing
-		cv::copyMakeBorder(m_LetterboxImage, m_LetterboxImage, m_YOffset, m_YOffset, m_XOffset,
-			m_XOffset, cv::BORDER_CONSTANT, cv::Scalar(128, 128, 128));
+		cv::cuda::copyMakeBorder(m_LetterboxImage, m_LetterboxImage, m_YOffset, m_YOffset, m_XOffset,
+			m_XOffset, cv::BORDER_CONSTANT, cv::Scalar(128, 128, 128), m_Stream);
 	}
 	else
 	{
-		cv::resize(m_OrigImage, m_LetterboxImage, cv::Size(inputW, inputH), 0, 0, cv::INTER_CUBIC);
+		cv::cuda::resize(m_OrigImage, m_LetterboxImage, cv::Size(inputW, inputH), 0, 0, cv::INTER_CUBIC, m_Stream);
 	}
-    cv::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB);
-    m_LetterboxImage.convertTo(m_Float, CV_32FC3, 1.0);
-    m_GpuMat.upload(m_Float);
+    cv::cuda::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB, 0, m_Stream);
+    m_LetterboxImage.convertTo(m_Float, CV_32FC3, 1.0, m_Stream);
 }
 

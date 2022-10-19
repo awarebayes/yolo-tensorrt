@@ -49,10 +49,12 @@ int main()
 	for (;;)
 	{
 		//prepare batch data
-		std::vector<cv::Mat> batch_img;
-		cv::Mat temp0 = image0.clone();
-		cv::Mat temp1 = image1.clone();
-		batch_img.push_back(temp0);
+		std::vector<const cv::cuda::HostMem*> batch_img;
+		cv::cuda::HostMem temp0;
+        image0.copyTo(temp0);
+		cv::cuda::HostMem temp1;
+        image1.copyTo(temp1);
+		batch_img.push_back(&temp0);
 		//batch_img.push_back(temp1);
 
 		//detect
@@ -66,13 +68,13 @@ int main()
 			for (const auto &r : batch_res[i])
 			{
 				std::cout <<"batch "<<i<< " id:" << r.id << " prob:" << r.prob << " rect:" << r.rect << std::endl;
-				cv::rectangle(batch_img[i], r.rect, cv::Scalar(255, 0, 0), 2);
+				cv::rectangle(*batch_img[i], r.rect, cv::Scalar(255, 0, 0), 2);
 				std::stringstream stream;
 				stream << std::fixed << std::setprecision(2) << "id:" << r.id << "  score:" << r.prob;
-				cv::putText(batch_img[i], stream.str(), cv::Point(r.rect.x, r.rect.y - 5), 0, 0.5, cv::Scalar(0, 0, 255), 2);
+				cv::putText(*batch_img[i], stream.str(), cv::Point(r.rect.x, r.rect.y - 5), 0, 0.5, cv::Scalar(0, 0, 255), 2);
 			}
 			cv::namedWindow("image" + std::to_string(i), cv::WINDOW_NORMAL);
-			cv::imshow("image"+std::to_string(i), batch_img[i]);
+			cv::imshow("image"+std::to_string(i), *batch_img[i]);
 		}
 		cv::waitKey(10);
 	}

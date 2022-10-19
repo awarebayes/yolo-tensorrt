@@ -73,10 +73,11 @@ public:
     CudaPipeline(const std::string &s_net_type, const int& inputH_, const int& inputW_) : s_net_type_(s_net_type), inputH(inputH_), inputW(inputW_) {};
     int getImageHeight() const { return m_Height; }
     int getImageWidth() const { return m_Width; }
-    cv::cuda::GpuMat& getResult() { return m_GpuMat; }
-    cv::Mat getOriginalImage() const { return m_OrigImage; }
+    cv::cuda::GpuMat& getResult() { return m_Float; }
+    // cv::Mat getOriginalImage() const { return m_OrigImage; }
     void preprocess(const cv::Mat &image);
-    void await() {};
+    void preprocess(const cv::cuda::HostMem &image);
+    void await() { m_Stream.waitForCompletion(); };
 
 private:
     int m_Height = 0;
@@ -93,15 +94,14 @@ private:
     const int inputW;
 
     // unaltered original Image
-    cv::Mat m_OrigImage;
+    cv::cuda::GpuMat m_OrigImage;
     // letterboxed Image given to the network as input
-    cv::Mat m_LetterboxImage;
+    cv::cuda::GpuMat m_LetterboxImage;
     // final image marked with the bounding boxes
-    cv::Mat m_MarkedImage;
+    cv::cuda::GpuMat m_MarkedImage;
 
-    cv::Mat m_Float;
-
-    cv::cuda::GpuMat m_GpuMat;
+    cv::cuda::GpuMat m_Float;
+    cv::cuda::Stream m_Stream;
 };
 
 #endif

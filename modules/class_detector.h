@@ -61,7 +61,7 @@ namespace yolo_tensorrt {
 
         void init(const Config &config);
 
-        void detect(const std::vector<cv::Mat> &mat_image, std::vector<BatchResult> &vec_batch_result);
+        void detect(const std::vector<const cv::cuda::HostMem*> &mat_image, std::vector<BatchResult> &vec_batch_result);
 
         cv::Size get_input_size() const;
 
