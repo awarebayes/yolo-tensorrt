@@ -75,7 +75,6 @@ public:
     int getImageWidth() const { return m_Width; }
     cv::Mat& getLetterBoxedImage() { return m_LetterboxImage; }
     cv::Mat getOriginalImage() const { return m_OrigImage; }
-    void letterbox(const int& inputH, const int& inputW);
     void preprocess(const cv::Mat &image);
     void await() {};
 
@@ -99,6 +98,8 @@ private:
     cv::Mat m_LetterboxImage;
     // final image marked with the bounding boxes
     cv::Mat m_MarkedImage;
+
+    cv::Mat m_Float;
 };
 
 #endif
