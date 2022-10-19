@@ -229,11 +229,19 @@ std::string DsImage::exportJson() const
     return json.str();
 }
 
-CudaPipeline::CudaPipeline(const std::string &s_net_type, const int& inputH_, const int& inputW_): s_net_type_(s_net_type), inputH(inputH_), inputW(inputW_)
+CudaPipeline::CudaPipeline(const std::string &s_net_type, unsigned char *gpu_blob, const int& inputH_, const int& inputW_): s_net_type_(s_net_type), inputH(inputH_), inputW(inputW_)
 {
     m_OrigImage = std::make_shared<cv::cuda::GpuMat>();
     m_LetterboxImage = std::make_shared<cv::cuda::GpuMat>();
     m_Float = std::make_shared<cv::cuda::GpuMat>();
+    int n_channels = 3;
+
+    cv::Size size(inputW, inputH);
+    float *m_gpu_input = (float *)gpu_blob;
+    for (int ch = 0; ch < n_channels; ch++) {
+        float *dest = m_gpu_input + ch * inputH * inputW;
+        m_chw.emplace_back(cv::cuda::GpuMat(size, CV_32FC1, dest));
+    }
 };
 
 void CudaPipeline::preprocess(const cv::Mat &image)
@@ -292,5 +300,6 @@ void CudaPipeline::preprocess(const cv::cuda::HostMem& mat_image_)
 	}
     cv::cuda::cvtColor(*m_LetterboxImage, *m_LetterboxImage, cv::COLOR_BGR2RGB, 0, m_Stream);
     m_LetterboxImage->convertTo(*m_Float, CV_32FC3, 1.0, m_Stream);
+    cv::cuda::split(*m_Float, m_chw, m_Stream);
 }
 

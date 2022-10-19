@@ -36,9 +36,14 @@ namespace yolo_tensorrt {
 
             this->build_net();
 
+            unsigned char *gpu_blob = _p_net->getInputBuffer();
+
+            int image_size = 3 * _p_net->getInputH() * _p_net->getInputW();
+
             for (int i = 0; i < _config.batch_size; i++)
             {
-                cuda_pipelines.emplace_back(_vec_net_type[_config.net_type], _p_net->getInputH(), _p_net->getInputW());
+                float *m_gpu_input = (float *)gpu_blob + i * image_size;
+                cuda_pipelines.emplace_back(_vec_net_type[_config.net_type], (unsigned char*)m_gpu_input, _p_net->getInputH(), _p_net->getInputW());
             }
         }
 
@@ -63,7 +68,6 @@ namespace yolo_tensorrt {
                 cuda_pipelines[i].preprocess(*vec_image[i]);
             for (int i = 0; i < vec_image.size(); i++)
                 cuda_pipelines[i].await();
-            blobFromDsImages(cuda_pipelines, _p_net->getInputBuffer(), _p_net->getInputH(), _p_net->getInputW());
             _p_net->doInference(static_cast<uint32_t>(cuda_pipelines.size()));
             for (size_t i = 0; i < cuda_pipelines.size(); ++i)
             {

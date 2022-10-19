@@ -68,7 +68,7 @@ private:
 class CudaPipeline
 {
 public:
-    CudaPipeline(const std::string &s_net_type, const int& inputH_, const int& inputW_);
+    CudaPipeline(const std::string &s_net_type, unsigned char *gpu_blob, const int& inputH_, const int& inputW_);
     int getImageHeight() const { return m_Height; }
     int getImageWidth() const { return m_Width; }
     cv::cuda::GpuMat& getResult() { await(); return *m_Float; }
@@ -95,6 +95,7 @@ private:
     std::shared_ptr<cv::cuda::GpuMat> m_OrigImage;
     std::shared_ptr<cv::cuda::GpuMat> m_LetterboxImage;
     std::shared_ptr<cv::cuda::GpuMat> m_Float;
+    std::vector<cv::cuda::GpuMat> m_chw;
     cv::cuda::Stream m_Stream;
 };
 

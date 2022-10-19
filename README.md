@@ -1,9 +1,10 @@
 # Yolov5 Yolov4 Yolov3 TensorRT Implementation
 
 # My Changes:
-![image](https://user-images.githubusercontent.com/42784580/196661623-3a83043b-a96e-4eab-8be3-701d7c7faf31.png)
+![image](https://user-images.githubusercontent.com/42784580/196665065-cc33f57c-6ac1-44c6-833c-29732131cee6.png)
 
-- Cuda image processing
+- This fork was made for performance purposes
+- Asyncronous cuda image preprocessing
 - Get uploaded image (cuda::GpuFrame) for later usage with reid/poses/etc
 
 # Original reaadme:
