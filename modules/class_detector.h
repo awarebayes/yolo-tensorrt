@@ -63,6 +63,8 @@ namespace yolo_tensorrt {
 
         void detect(const std::vector<const cv::cuda::HostMem*> &mat_image, std::vector<BatchResult> &vec_batch_result);
 
+        std::vector<std::shared_ptr<cv::cuda::GpuMat>> get_uploaded_gpu_images();
+
         cv::Size get_input_size() const;
 
     private:

@@ -34,6 +34,9 @@ namespace yolo_tensorrt {
     {
         _impl->_detector.detect(mat_image, vec_batch_result);
     }
+    std::vector<std::shared_ptr<cv::cuda::GpuMat>> Detector::get_uploaded_gpu_images() {
+        return _impl->_detector.get_uploaded_gpu_images();
+    }
 
     cv::Size Detector::get_input_size() const
     {

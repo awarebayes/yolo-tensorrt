@@ -72,7 +72,7 @@ public:
     int getImageHeight() const { return m_Height; }
     int getImageWidth() const { return m_Width; }
     cv::cuda::GpuMat& getResult() { await(); return *m_Float; }
-    cv::cuda::GpuMat& getOriginalImage() { await(); return *m_OrigImage; }
+    std::shared_ptr<cv::cuda::GpuMat> getOriginalImage() { await(); return m_OrigImage; }
     void preprocess(const cv::Mat &image);
     void preprocess(const cv::cuda::HostMem &image);
     void await() { m_Stream.waitForCompletion(); };

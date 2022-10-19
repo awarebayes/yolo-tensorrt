@@ -38,8 +38,18 @@ namespace yolo_tensorrt {
 
             for (int i = 0; i < _config.batch_size; i++)
             {
-                vec_ds_images.emplace_back(_vec_net_type[_config.net_type], _p_net->getInputH(), _p_net->getInputW());
+                cuda_pipelines.emplace_back(_vec_net_type[_config.net_type], _p_net->getInputH(), _p_net->getInputW());
             }
+        }
+
+        std::vector<std::shared_ptr<cv::cuda::GpuMat>> get_uploaded_gpu_images()
+        {
+            std::vector<std::shared_ptr<cv::cuda::GpuMat>> vec_gpu_images;
+            for (int i = 0; i < _config.batch_size; i++)
+            {
+                vec_gpu_images.push_back(cuda_pipelines[i].getOriginalImage());
+            }
+            return vec_gpu_images;
         }
 
         void detect(const std::vector<const cv::cuda::HostMem*> &vec_image,
@@ -50,14 +60,14 @@ namespace yolo_tensorrt {
                 vec_batch_result.reserve(vec_image.size());
 
             for (int i = 0; i < vec_image.size(); i++)
-                vec_ds_images[i].preprocess(*vec_image[i]);
+                cuda_pipelines[i].preprocess(*vec_image[i]);
             for (int i = 0; i < vec_image.size(); i++)
-                vec_ds_images[i].await();
-            blobFromDsImages(vec_ds_images, _p_net->getInputBuffer(), _p_net->getInputH(), _p_net->getInputW());
-            _p_net->doInference(static_cast<uint32_t>(vec_ds_images.size()));
-            for (size_t i = 0; i < vec_ds_images.size(); ++i)
+                cuda_pipelines[i].await();
+            blobFromDsImages(cuda_pipelines, _p_net->getInputBuffer(), _p_net->getInputH(), _p_net->getInputW());
+            _p_net->doInference(static_cast<uint32_t>(cuda_pipelines.size()));
+            for (size_t i = 0; i < cuda_pipelines.size(); ++i)
             {
-                auto curImage = vec_ds_images.at(i);
+                auto curImage = cuda_pipelines.at(i);
                 auto binfo = _p_net->decodeDetections(static_cast<int>(i), curImage.getImageHeight(), curImage.getImageWidth());
                 auto remaining = (_p_net->getNMSThresh() > 0) ? nmsAllClasses(_p_net->getNMSThresh(), binfo, _p_net->getNumClasses(), _vec_net_type[_config.net_type]) : binfo;
 
@@ -141,7 +151,7 @@ namespace yolo_tensorrt {
         std::vector<std::string> _vec_precision{"kINT8", "kHALF", "kFLOAT"};
         std::unique_ptr<Yolo> _p_net = nullptr;
         Timer _m_timer;
-        std::vector<CudaPipeline> vec_ds_images;
+        std::vector<CudaPipeline> cuda_pipelines;
     };
 }
 
