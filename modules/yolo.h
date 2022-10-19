@@ -107,10 +107,11 @@ public:
     uint32_t getNumClasses() const { return static_cast<uint32_t>(m_ClassNames.size()); }
     bool isPrintPredictions() const { return m_PrintPredictions; }
     bool isPrintPerfInfo() const { return m_PrintPerfInfo; }
-    void doInference(const unsigned char* input, const uint32_t batchSize);
+    void doInference(const uint32_t batchSize);
     std::vector<BBoxInfo> decodeDetections(const int& imageIdx,
 											const int& imageH,
                                            const int& imageW);
+    unsigned char *getInputBuffer() {return (unsigned char *)m_DeviceBuffers.at(m_InputBindingIndex); };
 
     virtual ~Yolo();
 

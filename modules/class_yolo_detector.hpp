@@ -24,7 +24,7 @@ namespace yolo_tensorrt {
     {
     public:
         YoloDectector() = default;
-        ~YoloDectector() { cudaFree(m_blob); delete [] m_cpu_blob; };
+        ~YoloDectector() = default;
 
         void init(const Config &config)
         {
@@ -35,9 +35,6 @@ namespace yolo_tensorrt {
             this->parse_config();
 
             this->build_net();
-            
-            cudaMalloc(&m_blob, _p_net->getInputH() * _p_net->getInputW() * 3 * _config.batch_size * sizeof(float));
-            m_cpu_blob = new unsigned char[_p_net->getInputH() * _p_net->getInputW() * 3 * _config.batch_size * sizeof(float)];
         }
 
         void detect(const std::vector<cv::Mat> &vec_image,
@@ -51,9 +48,8 @@ namespace yolo_tensorrt {
             {
                 vec_ds_images.emplace_back(img, _vec_net_type[_config.net_type], _p_net->getInputH(), _p_net->getInputW());
             }
-            blobFromDsImages(vec_ds_images, m_blob, _p_net->getInputH(), _p_net->getInputW());
-            // cudaMemcpy(m_blob, m_cpu_blob, _p_net->getInputH() * _p_net->getInputW() * 3 * _config.batch_size * sizeof(float), cudaMemcpyHostToDevice);
-            _p_net->doInference(m_blob, static_cast<uint32_t>(vec_ds_images.size()));
+            blobFromDsImages(vec_ds_images, _p_net->getInputBuffer(), _p_net->getInputH(), _p_net->getInputW());
+            _p_net->doInference(static_cast<uint32_t>(vec_ds_images.size()));
             for (size_t i = 0; i < vec_ds_images.size(); ++i)
             {
                 auto curImage = vec_ds_images.at(i);
@@ -140,8 +136,6 @@ namespace yolo_tensorrt {
         std::vector<std::string> _vec_precision{"kINT8", "kHALF", "kFLOAT"};
         std::unique_ptr<Yolo> _p_net = nullptr;
         Timer _m_timer;
-        unsigned char *m_blob;
-        unsigned char *m_cpu_blob;
     };
 }
 

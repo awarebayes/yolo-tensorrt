@@ -164,7 +164,8 @@ std::vector<YoloPluginOutput*> YoloPluginProcess(YoloPluginCtx* ctx, std::vector
 //		preEnd = std::chrono::high_resolution_clock::now();
 
 //		inferStart = std::chrono::high_resolution_clock::now();
-        ctx->inferenceNetwork->doInference(preprocessedImages.data, cvmats.size());
+        assert(false && "Not implemented. Uncomment line below and make it compile.");
+        //ctx->inferenceNetwork->doInference(preprocessedImages.data, cvmats.size());
   //      inferEnd = std::chrono::high_resolution_clock::now();
 
 //		postStart = std::chrono::high_resolution_clock::now();
