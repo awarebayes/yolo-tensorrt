@@ -1,5 +1,11 @@
 # Yolov5 Yolov4 Yolov3 TensorRT Implementation
 
+# My Changes:
+![image](https://user-images.githubusercontent.com/42784580/196661623-3a83043b-a96e-4eab-8be3-701d7c7faf31.png)
+
+- Cuda image processing
+- Get uploaded image (cuda::GpuFrame) for later usage with reid/poses/etc
+
 ![GitHub stars](https://img.shields.io/github/stars/enazoe/yolo-tensorrt) ![GitHub forks](https://img.shields.io/github/forks/enazoe/yolo-tensorrt)  ![GitHub watchers](https://img.shields.io/github/watchers/enazoe/yolo-tensorrt)  [![Gitter](https://badges.gitter.im/yolo-tensorrt/community.svg)](https://gitter.im/yolo-tensorrt/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 __news:__ 2021.06.04:yolov5-v5.0 support
