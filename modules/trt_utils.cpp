@@ -87,7 +87,6 @@ void blobFromDsImages(std::vector<DsImage>& inputImages, unsigned char *blob, co
 void blobFromDsImages(std::vector<CudaPipeline>& inputImages, unsigned char *gpu_blob, const int& inputH, const int& inputW)
 {
     cv::Size size(inputW, inputH);
-    constexpr bool swapRB = true;
     constexpr int ddepth = CV_32F;
     constexpr int nch = 3;
     size_t nimages = inputImages.size();

@@ -229,6 +229,13 @@ std::string DsImage::exportJson() const
     return json.str();
 }
 
+CudaPipeline::CudaPipeline(const std::string &s_net_type, const int& inputH_, const int& inputW_): s_net_type_(s_net_type), inputH(inputH_), inputW(inputW_)
+{
+    m_OrigImage = std::make_shared<cv::cuda::GpuMat>();
+    m_LetterboxImage = std::make_shared<cv::cuda::GpuMat>();
+    m_Float = std::make_shared<cv::cuda::GpuMat>();
+};
+
 void CudaPipeline::preprocess(const cv::Mat &image)
 {
     std::cout << "Warning: use the HostMem method!" << std::endl;
@@ -241,15 +248,15 @@ void CudaPipeline::preprocess(const cv::Mat &image)
 
 void CudaPipeline::preprocess(const cv::cuda::HostMem& mat_image_)
 {
-    m_OrigImage.upload(mat_image_, m_Stream);
-	m_Height = m_OrigImage.rows;
-	m_Width = m_OrigImage.cols;
-	if (!m_OrigImage.data || m_OrigImage.cols <= 0 || m_OrigImage.rows <= 0)
+    m_OrigImage->upload(mat_image_, m_Stream);
+	m_Height = m_OrigImage->rows;
+	m_Width = m_OrigImage->cols;
+	if (!m_OrigImage->data || m_OrigImage->cols <= 0 || m_OrigImage->rows <= 0)
 	{
 		std::cout << "empty image !"<< std::endl;
 		assert(0);
 	}
-	if (m_OrigImage.channels() != 3)
+	if (m_OrigImage->channels() != 3)
 	{
 		std::cout << "Non RGB images are not supported "<< std::endl;
 		assert(0);
@@ -274,16 +281,16 @@ void CudaPipeline::preprocess(const cv::cuda::HostMem& mat_image_)
 		assert(2 * m_YOffset + resizeH == inputH);
 
 		// resizing
-		cv::cuda::resize(m_OrigImage, m_LetterboxImage, cv::Size(resizeW, resizeH), 0, 0, cv::INTER_CUBIC, m_Stream);
+		cv::cuda::resize(*m_OrigImage, *m_LetterboxImage, cv::Size(resizeW, resizeH), 0, 0, cv::INTER_CUBIC, m_Stream);
 		// letterboxing
-		cv::cuda::copyMakeBorder(m_LetterboxImage, m_LetterboxImage, m_YOffset, m_YOffset, m_XOffset,
+		cv::cuda::copyMakeBorder(*m_LetterboxImage, *m_LetterboxImage, m_YOffset, m_YOffset, m_XOffset,
 			m_XOffset, cv::BORDER_CONSTANT, cv::Scalar(128, 128, 128), m_Stream);
 	}
 	else
 	{
-		cv::cuda::resize(m_OrigImage, m_LetterboxImage, cv::Size(inputW, inputH), 0, 0, cv::INTER_CUBIC, m_Stream);
+		cv::cuda::resize(*m_OrigImage, *m_LetterboxImage, cv::Size(inputW, inputH), 0, 0, cv::INTER_CUBIC, m_Stream);
 	}
-    cv::cuda::cvtColor(m_LetterboxImage, m_LetterboxImage, cv::COLOR_BGR2RGB, 0, m_Stream);
-    m_LetterboxImage.convertTo(m_Float, CV_32FC3, 1.0, m_Stream);
+    cv::cuda::cvtColor(*m_LetterboxImage, *m_LetterboxImage, cv::COLOR_BGR2RGB, 0, m_Stream);
+    m_LetterboxImage->convertTo(*m_Float, CV_32FC3, 1.0, m_Stream);
 }
 
